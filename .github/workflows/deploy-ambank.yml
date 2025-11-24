@@ -14,13 +14,21 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      - name: Set up Java 21 (Temurin)
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '21'
+          cache: 'maven'
+
       - name: Check java version
-        run: java -version && javac -version
+        run: |
+          java -version
+          javac -version
+          echo "JAVA_HOME=$JAVA_HOME"
 
       - name: Build with Maven (project in subfolder)
-        # opção 1: usar -f para apontar o pom.xml
         run: mvn -f AnhembiMorumBank/pom.xml -B -DskipTests=false clean package
-        # se quiser pular testes temporariamente, troque -DskipTests=false por -DskipTests=true
 
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v4
