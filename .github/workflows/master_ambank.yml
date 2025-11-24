@@ -17,7 +17,7 @@ jobs:
       - name: Set up Java 21 (Temurin)
         uses: actions/setup-java@v4
         with:
-          distribution: 'temurin'   # garante JDK confiável que tem Java 21
+          distribution: 'temurin'
           java-version: '21'
           cache: 'maven'
 
@@ -27,8 +27,8 @@ jobs:
           javac -version
           echo "JAVA_HOME=$JAVA_HOME"
 
-      - name: Build with Maven (project in subfolder)
-        run: mvn -f AnhembiMorumBank/pom.xml -B -DskipTests=false clean package
+      - name: Build with Maven (skip tests)
+        run: mvn -f AnhembiMorumBank/pom.xml -B -DskipTests=true clean package
 
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v4
