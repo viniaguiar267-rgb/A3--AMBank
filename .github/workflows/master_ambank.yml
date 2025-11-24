@@ -21,14 +21,19 @@ jobs:
           java-version: '21'
           cache: 'maven'
 
-      - name: Check java version
-        run: |
-          java -version
-          javac -version
-          echo "JAVA_HOME=$JAVA_HOME"
-
       - name: Build with Maven (skip tests)
         run: mvn -f AnhembiMorumBank/pom.xml -B -DskipTests=true clean package
+
+      - name: Show target folder (debug)
+        run: |
+          echo "== present working dir =="
+          pwd
+          echo "== list root =="
+          ls -la
+          echo "== list AnhembiMorumBank =="
+          ls -la AnhembiMorumBank || true
+          echo "== list AnhembiMorumBank/target =="
+          ls -la AnhembiMorumBank/target || true
 
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v4
@@ -48,8 +53,15 @@ jobs:
         with:
           name: java-app
 
+      - name: Find JAR in workspace (debug)
+        run: |
+          echo "== find all jars under workspace =="
+          find . -type f -name "*.jar" -maxdepth 6 -print || true
+          echo "== list current dir =="
+          ls -la || true
+
       - name: Deploy to Azure Web App using publish profile
         uses: azure/webapps-deploy@v2
         with:
           publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
-          package: 'AnhembiMorumBank/target/*.jar'
+          package: '**/target/*.jar'
