@@ -1,4 +1,5 @@
 name: Build and deploy JAR app to Azure Web App - AMBank
+
 on:
   push:
     branches:
@@ -6,42 +7,40 @@ on:
   workflow_dispatch:
 
 jobs:
+
   build:
     runs-on: ubuntu-latest
-    permissions:
-      contents: read
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Set up Java 21 (Temurin)
+      - name: Set up Java
         uses: actions/setup-java@v4
         with:
           distribution: 'temurin'
           java-version: '21'
-          cache: 'maven'
 
-      - name: Build with Maven (skip tests)
-        run: mvn -f AnhembiMorumBank/pom.xml -B -DskipTests=true clean package
+      - name: Build with Maven
+        run: mvn -B package --file AnhembiMorumBank/pom.xml
 
-      - name: Show target folder (debug)
-        run: |
-          echo "== present working dir =="
-          pwd
-          echo "== list root =="
-          ls -la
-          echo "== list AnhembiMorumBank =="
-          ls -la AnhembiMorumBank || true
-          echo "== list AnhembiMorumBank/target =="
-          ls -la AnhembiMorumBank/target || true
-          echo "== find any jars under workspace =="
-          find . -type f -name "*.jar" -maxdepth 6 -print || true
-
-      - name: Upload artifact for deployment job (all jars)
+      - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
-          name: java-app
-          path: '**/target/*.jar'   # pega qualquer JAR dentro de qualquer target/
+          name: app-jar
+          path: AnhembiMorumBank/target/*.jar
 
   deploy:
-    need
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - name: Download artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: app-jar
+
+      - name: Deploy to Azure Web App
+        uses: azure/webapps-deploy@v2
+        with:
+          app-name: AMBank
+          publish-profile: ${{ secrets.AzureAppService_PublishProfile }}
+          package: '*.jar'
