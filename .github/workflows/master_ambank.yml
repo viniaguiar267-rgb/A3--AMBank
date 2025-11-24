@@ -34,34 +34,14 @@ jobs:
           ls -la AnhembiMorumBank || true
           echo "== list AnhembiMorumBank/target =="
           ls -la AnhembiMorumBank/target || true
+          echo "== find any jars under workspace =="
+          find . -type f -name "*.jar" -maxdepth 6 -print || true
 
-      - name: Upload artifact for deployment job
+      - name: Upload artifact for deployment job (all jars)
         uses: actions/upload-artifact@v4
         with:
           name: java-app
-          path: AnhembiMorumBank/target/*.jar
+          path: '**/target/*.jar'   # pega qualquer JAR dentro de qualquer target/
 
   deploy:
-    needs: build
-    runs-on: ubuntu-latest
-    permissions:
-      id-token: write
-      contents: read
-    steps:
-      - name: Download artifact from build job
-        uses: actions/download-artifact@v4
-        with:
-          name: java-app
-
-      - name: Find JAR in workspace (debug)
-        run: |
-          echo "== find all jars under workspace =="
-          find . -type f -name "*.jar" -maxdepth 6 -print || true
-          echo "== list current dir =="
-          ls -la || true
-
-      - name: Deploy to Azure Web App using publish profile
-        uses: azure/webapps-deploy@v2
-        with:
-          publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
-          package: '**/target/*.jar'
+    need
